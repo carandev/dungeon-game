@@ -1,15 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyBehaivor : MonoBehaviour
 {
     public float alertRange;
     public LayerMask playerLayer;
     public float speed;
+    public float health = 100;
+    public Slider sliderHealth;
     public Transform player;
     private Animator animator;
     bool isAlert;
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Player"))
+        {
+            health -= 5;
+        }
+    }
 
     void Start()
     {
@@ -29,6 +39,8 @@ public class EnemyBehaivor : MonoBehaviour
         } else {
             animator.SetBool("walk", false);
         }
+
+        sliderHealth.value = health;
     }
 
     private void OnDrawGizmos() {

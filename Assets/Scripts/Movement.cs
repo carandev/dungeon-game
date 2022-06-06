@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class Movement : MonoBehaviour
     public int speed = 2;
     public int turnSpeed = 40;
     public int jumpSpeed = 5;
+    public float maxHealth;
+    public float health;
+    public Image healthImage;
     private Animator animator;
     void Start()
     {
@@ -15,6 +19,13 @@ public class Movement : MonoBehaviour
     }
 
     // Update is called once per frame
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Enemy"))
+        {
+            health -= 5;
+        }
+    }
+
     void Update()
     {
       float movementHorizontal = Input.GetAxis("Horizontal");
@@ -39,5 +50,7 @@ public class Movement : MonoBehaviour
       transform.Translate(Vector3.up * jumpSpeed * Time.deltaTime * jump);
 
       transform.Rotate(Vector3.up * turnSpeed * Time.deltaTime * movementHorizontal);
+
+      healthImage.fillAmount = health / maxHealth;
     }
 }
