@@ -5,14 +5,19 @@ using UnityEngine.UI;
 
 public class EnemyBehaivor : MonoBehaviour
 {
-    public float alertRange;
-    public LayerMask playerLayer;
-    public float speed;
-    public float health = 100;
+    private float health = 100;
+    private float cronometro;
+    private float grado;
+
+    private int rutina;
+
     public Slider sliderHealth;
-    public Transform player;
+
     private Animator animator;
-    bool isAlert;
+
+    private Quaternion angulo;
+
+    public GameObject target;
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player"))
@@ -24,27 +29,70 @@ public class EnemyBehaivor : MonoBehaviour
     void Start()
     {
        animator = GetComponent<Animator>(); 
+       target = GameObject.Find("Character");
     }
 
     // Update is called once per frame
     void Update()
     {
-        isAlert = Physics.CheckSphere(transform.position, alertRange, playerLayer);
-
-        if (isAlert)
-        {
-            transform.LookAt(player);
-            transform.position = Vector3.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
-            animator.SetBool("walk", true);
-        } else {
-            animator.SetBool("walk", false);
-        }
 
         sliderHealth.value = health;
+
+        if (health <= 0){
+            animator.SetBool("dead", true);
+            Destroy(gameObject, 2);
+        }else {
+            Enemy_Behaivor();
+        }
     }
 
-    private void OnDrawGizmos() {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, alertRange);
+    public void Enemy_Behaivor() {
+        if (Vector3.Distance(transform.position, target.transform.position) > 10)
+        {
+            animator.SetBool("run", false);
+            cronometro += 1 * Time.deltaTime;
+
+            if (cronometro >= 4){
+                rutina = Random.Range(0, 2);
+                cronometro = 0;
+            }
+
+            switch (rutina)
+            {
+                case 0:
+                    animator.SetBool("walk", false);
+                    break;
+
+                case 1:
+                    grado = Random.Range(80, 360);
+                    angulo = Quaternion.Euler(0, grado, 0);
+                    rutina++;
+                    break;
+
+                case 2:
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, angulo, 1);
+                    transform.Translate(Vector3.forward * 1 * Time.deltaTime);
+                    animator.SetBool("walk", true);
+                    break;
+            }
+        } else {
+            if (Vector3.Distance(transform.position, target.transform.position) > 1.5){
+                var lookPos = target.transform.position - transform.position;
+                lookPos.y = 0;
+                var rotation = Quaternion.LookRotation(lookPos);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, 10);
+
+                animator.SetBool("walk", false);
+                animator.SetBool("run", true);
+
+                transform.Translate(Vector3.forward * 2 * Time.deltaTime);
+                animator.SetBool("attack", false);
+            } else {
+                animator.SetBool("walk", false);
+                animator.SetBool("run", false);
+
+                animator.SetBool("attack", true);
+            }
+        }
     }
 }

@@ -2,17 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Movement : MonoBehaviour
 {
     // Start is called before the first frame update
-    public int speed = 2;
-    public int turnSpeed = 40;
-    public int jumpSpeed = 5;
-    public float maxHealth;
-    public float health;
+    private int speed = 5;
+    private int turnSpeed = 100;
+    private int jumpSpeed = 5;
+    private float maxHealth = 200;
+    private float health = 200;
     public Image healthImage;
     private Animator animator;
+    public GameOverScreen gameOverScreen;
+    public GameObject player;
+
     void Start()
     {
        animator = GetComponent<Animator>(); 
@@ -22,7 +26,7 @@ public class Movement : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Enemy"))
         {
-            health -= 5;
+            health -= 1;
         }
     }
 
@@ -31,6 +35,7 @@ public class Movement : MonoBehaviour
       float movementHorizontal = Input.GetAxis("Horizontal");
       float movementVertical = Input.GetAxis("Vertical");
       float mouseX = Input.GetAxis("Mouse X");
+      float fire = Input.GetAxis("Fire1");
       float jump = Input.GetAxis("Jump");
 
       if (movementHorizontal != 0 || movementVertical != 0){
@@ -44,6 +49,19 @@ public class Movement : MonoBehaviour
       } else {
           animator.SetBool("isJumping", false);
       }
+
+      if (fire != 0)
+      {
+          animator.SetBool("isAttacking", true);
+      } else {
+          animator.SetBool("isAttacking", false);
+      }
+
+      if (health < 0){
+        animator.SetBool("isDead", true);
+        Destroy(player, 4);
+        gameOverScreen.Setup();
+      }
         
       transform.Translate(Vector3.forward * speed * Time.deltaTime * movementVertical);    
       transform.Translate(Vector3.right * speed * Time.deltaTime * movementHorizontal);
@@ -53,4 +71,9 @@ public class Movement : MonoBehaviour
 
       healthImage.fillAmount = health / maxHealth;
     }
+
+    public void LoadScene(){
+        SceneManager.LoadScene("MainScene");
+    }
+
 }
